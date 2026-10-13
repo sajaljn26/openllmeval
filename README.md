@@ -20,16 +20,31 @@ Evaluating LLMs often suffers from subjectivity. This system replaces qualitativ
 
 ---
 
-## 📊 Evaluation Metrics
+## 📊 Evaluation Framework (The "Eval" Suite)
 
-The system measures four key performance indicators (KPIs) to identify bottlenecks in the RAG pipeline:
+The core of this project is the transition from "vibes-based" testing to **Metric-Driven Development**. The system employs a specialized evaluation suite to pinpoint exactly where a RAG pipeline is failing.
 
-| Metric | Description | Purpose |
+### 1. The Metrics (KPIs)
+We measure four critical dimensions to ensure the AI is both honest and useful:
+
+| Metric | Definition | What it Detects |
 | :--- | :--- | :--- |
-| **Faithfulness** | Measures if the answer is derived solely from the retrieved context. | Detects **Hallucinations**. |
-| **Answer Relevancy** | Evaluates how well the answer addresses the original user query. | Detects **Irrelevant Outputs**. |
-| **Context Relevancy** | Measures the proportion of retrieved context that is useful for the query. | Detects **Retrieval Inefficiency**. |
-| **Correctness** | Compares the generated answer against a provided ground-truth answer. | Detects **Factual Inaccuracy**. |
+| **Faithfulness** | Checks if the answer is derived *only* from the retrieved context. | **Hallucinations**: Stops the AI from making things up. |
+| **Answer Relevancy** | Evaluates how well the answer addresses the user's specific intent. | **Avoidance**: Stops the AI from giving vague or generic answers. |
+| **Context Relevancy** | Measures the proportion of retrieved chunks that are actually useful. | **Retrieval Noise**: Identifies if the Vector DB is pulling irrelevant data. |
+| **Correctness** | Compares the generated answer against a ground-truth "Golden Dataset". | **Factual Errors**: Ensures the final answer is objectively true. |
+
+### 2. Experimental Design (A/B Testing)
+To optimize the system, I conducted multiple evaluation runs (Experiments) to test the impact of the **Retriever $k$ value** (the number of document chunks sent to the LLM):
+
+- **Experiment V1 ($k=1$):** Minimal context. Used as a baseline to identify "under-retrieval" errors.
+- **Experiment V2 ($k=3$):** Balanced context. Testing the optimal trade-off between precision and noise.
+- **Experiment V3 ($k=5$):** Maximum context. Testing if more information leads to higher correctness or introduces "lost-in-the-middle" effects.
+
+### 3. Failure Analysis
+The system logs every case that falls below a **0.7 threshold** into a `failures.jsonl` file. This allows for a "Root Cause Analysis":
+- **Low Context Relevancy $\rightarrow$ Low Faithfulness:** The problem is the **Vector Store/Embeddings**.
+- **High Context Relevancy $\rightarrow$ Low Faithfulness:** The problem is the **LLM Prompt/Reasoning**.
 
 ---
 
@@ -57,7 +72,7 @@ The system measures four key performance indicators (KPIs) to identify bottlenec
 
 ### Execution
 1. **Run Evaluations:**
-   Generate evaluation results for multiple experiments (different $k$ values):
+   Generate evaluation results for multiple experiments:
    ```bash
    python run_evaluations.py
    ```
@@ -86,4 +101,4 @@ Open_LLM_Eval_System/
 ```
 
 ## ⚖️ License
-Distributed under the MIT License. See `LICENSE` for more information.
+Distributed under the MIT License.

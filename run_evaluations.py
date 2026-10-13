@@ -45,12 +45,13 @@ def run_full_evaluation(experiment_name="experiment_v1", k_value=3):
     relevancy = AnswerRelevancyMetric(threshold=0.7, model=judge)
 
     results = []
+    individual_results = []
     
     for i, item in enumerate(dataset):
         print(f"Testing case {i+1}/{len(dataset)}: {item['question']}")
         
         # Add a small delay to avoid RateLimitError (429)
-        time.sleep(3)
+        time.sleep(2)
         
         # 1. Get Answer from RAG Agent
         rag_response = ask(item['question'])
@@ -69,15 +70,32 @@ def run_full_evaluation(experiment_name="experiment_v1", k_value=3):
             faithfulness.measure(test_case)
             relevancy.measure(test_case)
         except Exception as e:
-            print(f"Metric error: {e}")
-            # Default to 0 if it fails due to rate limit
+            print(f"⚠️ Metric error on case {i+1}: {e}")
             faithfulness.score = 0
             relevancy.score = 0
         
+        score_faith = faithfulness.score
+        score_rel = relevancy.score
+        
         results.append({
-            "faithfulness": faithfulness.score,
-            "relevancy": relevancy.score
+            "faithfulness": score_faith,
+            "relevancy": score_rel
         })
+
+        individual_results.append({
+            "question": item['question'],
+            "expected": item['expected_answer'],
+            "actual": actual_output,
+            "context": context,
+            "faithfulness": score_faith,
+            "relevancy": score_rel
+        })
+
+    # Save individual results for this experiment
+    with open(f"results_{experiment_name}.jsonl", "w") as f:
+        for res in individual_results:
+            f.write(json.dumps(res) + "\n")
+
 
     # Calculate Averages
     avg_faith = sum(r['faithfulness'] for r in results) / len(results)
@@ -91,8 +109,8 @@ def run_full_evaluation(experiment_name="experiment_v1", k_value=3):
         "metrics": {
             "answer_relevancy": avg_rel,
             "faithfulness": avg_faith,
-            "context_relevancy": avg_rel, # Simplified for this demo
-            "correctness": (avg_faith + avg_rel) / 2 # Simplified
+            "context_relevancy": avg_rel,
+            "correctness": (avg_faith + avg_rel) / 2
         }
     }
 
@@ -102,7 +120,6 @@ def run_full_evaluation(experiment_name="experiment_v1", k_value=3):
     print(f"✅ Evaluation complete. Summary saved to {experiment_name}.jsonl")
 
 if __name__ == "__main__":
-    # We will run 3 experiments with different simulated "k" values to populate the dashboard
     run_full_evaluation("experiment_v1", k_value=1)
     run_full_evaluation("experiment_v2", k_value=2)
     run_full_evaluation("experiment_v3", k_value=3)
