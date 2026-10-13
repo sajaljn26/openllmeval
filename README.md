@@ -1,52 +1,89 @@
 # Open LLM Evaluation System
 
-This is an open-source implementation of a RAG (Retrieval-Augmented Generation) evaluation lab. It demonstrates how to build, test, and evaluate an LLM pipeline using high-performance open-source tools.
+A professional framework for the systematic evaluation of Retrieval-Augmented Generation (RAG) pipelines. This project provides a complete environment to ingest documents, retrieve context, generate responses using high-performance open-source LLMs, and quantify performance using industry-standard metrics.
 
-## 🚀 Tech Stack
-- **LLM:** `Llama-3` via **Groq** (High-speed inference)
-- **Embeddings:** `all-MiniLM-L6-v2` via **HuggingFace** (Local, free embeddings)
-- **Vector Store:** **FAISS** (Efficient similarity search)
-- **Evaluation:** **DeepEval** (Configured with Groq as the LLM judge)
-- **Framework:** **LangChain**
-- **Dashboard:** **Streamlit**
+## 📌 Overview
 
-## 🛠️ Architecture
-1. **Knowledge Base:** A PDF document is processed and split into chunks.
-2. **Indexing:** Chunks are embedded using a HuggingFace model and stored in a FAISS index.
-3. **RAG Agent:** A LangChain agent uses `Llama-3` to retrieve relevant context and generate answers.
-4. **Evaluation:** The system uses **DeepEval** to score the output based on:
-   - **Faithfulness:** Is the answer derived solely from the retrieved context?
-   - **Answer Relevancy:** Does the answer actually address the user's question?
-   - **Context Relevancy:** Was the retrieved context actually useful?
-   - **Correctness:** Is the answer factually correct compared to a ground truth?
+Evaluating LLMs often suffers from subjectivity. This system replaces qualitative "manual testing" with quantitative metrics. By leveraging **DeepEval**, the system implements an "LLM-as-a-Judge" pattern to provide a mathematical score for the quality of the RAG pipeline.
 
-## 🏁 Getting Started
+## 🛠️ Technical Stack
 
-### 1. Requirements
+### Core Architecture
+- **LLM Inference:** [Groq](https://groq.com/) (Llama-3 / Mixtral) for low-latency, high-throughput generation.
+- **Embeddings:** `sentence-transformers/all-MiniLM-L6-v2` via HuggingFace for efficient local vectorization.
+- **Vector Database:** **FAISS** (Facebook AI Similarity Search) for optimized similarity search.
+- **Evaluation Framework:** **DeepEval** for calculating RAG-specific metrics.
+- **Frontend:** **Streamlit** for a centralized evaluation dashboard.
+
+### Pipeline Flow
+`PDF Document` $\rightarrow$ `Text Extraction (PyMuPDF)` $\rightarrow$ `Embedding Generation` $\rightarrow$ `FAISS Indexing` $\rightarrow$ `Context Retrieval` $\rightarrow$ `Groq LLM Generation` $\rightarrow$ `Metric Scoring (DeepEval)` $\rightarrow$ `Visualization (Streamlit)`
+
+---
+
+## 📊 Evaluation Metrics
+
+The system measures four key performance indicators (KPIs) to identify bottlenecks in the RAG pipeline:
+
+| Metric | Description | Purpose |
+| :--- | :--- | :--- |
+| **Faithfulness** | Measures if the answer is derived solely from the retrieved context. | Detects **Hallucinations**. |
+| **Answer Relevancy** | Evaluates how well the answer addresses the original user query. | Detects **Irrelevant Outputs**. |
+| **Context Relevancy** | Measures the proportion of retrieved context that is useful for the query. | Detects **Retrieval Inefficiency**. |
+| **Correctness** | Compares the generated answer against a provided ground-truth answer. | Detects **Factual Inaccuracy**. |
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
 - Python 3.10+
-- A **Groq API Key** (Get one for free at [console.groq.com](https://console.groq.com))
+- Groq API Key ([Get one here](https://console.groq.com/))
 
-### 2. Installation
-```bash
-pip install -r requirements.txt
+### Installation
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/your-username/Open-LLM-Evaluation-System.git
+   cd Open-LLM-Evaluation-System
+   ```
+2. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+3. Configure environment variables:
+   Create a `.env` file in the root directory:
+   ```env
+   GROQ_API_KEY=your_api_key_here
+   ```
+
+### Execution
+1. **Run Evaluations:**
+   Generate evaluation results for multiple experiments (different $k$ values):
+   ```bash
+   python run_evaluations.py
+   ```
+2. **Launch Dashboard:**
+   Visualize the metrics and compare runs:
+   ```bash
+   streamlit run dashboard.py
+   ```
+
+---
+
+## 📂 Project Structure
+
+```text
+Open_LLM_Eval_System/
+├── RAG1/               # Core RAG Pipeline
+│   ├── agent.py        # LLM logic and chain orchestration
+│   ├── indexing.py      # Embedding and FAISS setup
+│   ├── tools.py        # Retrieval tools
+│   └── prompts.py      # System prompts for the agent
+├── pdfs/               # Source documents for retrieval
+├── single_tests/       # Unit tests for individual metrics
+├── run_evaluations.py   # Main evaluation runner
+├── dashboard.py        # Streamlit visualization app
+└── requirements.txt    # Project dependencies
 ```
 
-### 3. Configuration
-Create a `.env` file in the root directory:
-```env
-GROQ_API_KEY=your_groq_api_key_here
-```
-
-### 4. Running the Project
-- **Test the Agent:** Create a small script to call `RAG1.agent.ask("your question")`.
-- **Run Evaluations:** Execute the scripts in `single_tests/` to see how the metrics work.
-- **Launch Dashboard:**
-```bash
-streamlit run dashboard.py
-```
-
-## 🌟 Why this is great for a Resume
-- **Cost Optimization:** Replaces expensive OpenAI calls with free/cheap open-source alternatives.
-- **Performance:** Leverages Groq for near-instantaneous response times.
-- **Rigorous Testing:** Implements industry-standard evaluation metrics (DeepEval) rather than just "vibes-based" testing.
-- **Full Stack AI:** Covers the entire pipeline: Data ingestion -> Embedding -> Retrieval -> Generation -> Evaluation -> Visualization.
+## ⚖️ License
+Distributed under the MIT License. See `LICENSE` for more information.
