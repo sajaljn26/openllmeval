@@ -1,0 +1,1 @@
+{"experiment": "experiment_v1", "retriever_k": 1, "number_of_test_cases": 5, "metrics": {"answer_relevancy": 0.0, "faithfulness": 0.8, "context_relevancy": 0.0, "correctness": 0.4}}

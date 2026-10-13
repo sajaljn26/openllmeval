@@ -1,0 +1,20 @@
+# API Keys and Secrets
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv
+venv/
+ENV/
+
+# DeepEval
+.deepeval/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Large data files
+*.pdf

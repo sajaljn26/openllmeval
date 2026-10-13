@@ -1,0 +1,5 @@
+{"question": "What is the diet of penguins?", "expected_answer": "Penguins primarily eat fish, krill, and squid."}
+{"question": "Where do penguins live?", "expected_answer": "Penguins are found almost exclusively in the Southern Hemisphere."}
+{"question": "Can penguins fly?", "expected_answer": "No, penguins are flightless birds."}
+{"question": "What is the purpose of the study in the PDF?", "expected_answer": "The study examines the behavior and adaptation of penguins in their natural habitat."}
+{"question": "How do penguins maintain body temperature?", "expected_answer": "They use a layer of blubber and densely packed feathers."}
