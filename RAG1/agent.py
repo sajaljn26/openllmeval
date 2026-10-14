@@ -10,7 +10,7 @@ load_dotenv()
 
 # Initialize Groq LLM
 llm = ChatGroq(
-    model="openai/gpt-oss-20b", 
+    model="qwen/qwen3.8-27b", 
     temperature=0,
     groq_api_key=os.getenv("GROQ_API_KEY")
 )
@@ -21,12 +21,14 @@ prompt = ChatPromptTemplate.from_messages([
     ("human", "Context: {context}\n\nQuestion: {input}"),
 ])
 
-def ask(question: str) -> dict:
+def ask(question: str, k: int = 3) -> dict:
     """ 
     A clean RAG implementation: 
     1. Retrieves context using the tool
     2. Generates an answer using the LLM
     """
+    # Set k value for retrieval
+    tl.K_VALUE = k
     
     # 1. Retrieve context
     try:

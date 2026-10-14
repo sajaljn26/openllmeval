@@ -1,1 +1,1 @@
-{"experiment": "experiment_v3", "retriever_k": 5, "number_of_test_cases": 20, "metrics": {"answer_relevancy": 0.910, "faithfulness": 0.940, "context_relevancy": 0.880, "correctness": 0.890}}
+{"experiment": "experiment_v3", "retriever_k": 3, "number_of_test_cases": 5, "metrics": {"answer_relevancy": 0.7142857142857142, "faithfulness": 0.7714285714285715, "context_relevancy": 0.24, "correctness": 0.6}}

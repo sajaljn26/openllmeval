@@ -38,13 +38,32 @@ We measure four critical dimensions to ensure the AI is both honest and useful:
 To optimize the system, I conducted multiple evaluation runs (Experiments) to test the impact of the **Retriever $k$ value** (the number of document chunks sent to the LLM):
 
 - **Experiment V1 ($k=1$):** Minimal context. Used as a baseline to identify "under-retrieval" errors.
-- **Experiment V2 ($k=3$):** Balanced context. Testing the optimal trade-off between precision and noise.
-- **Experiment V3 ($k=5$):** Maximum context. Testing if more information leads to higher correctness or introduces "lost-in-the-middle" effects.
+- **Experiment V2 ($k=2$):** Balanced context. Testing the optimal trade-off between precision and noise.
+- **Experiment V3 ($k=3$):** Increased context. Testing if more information leads to higher correctness or introduces "lost-in-the-middle" effects.
 
 ### 3. Failure Analysis
-The system logs every case that falls below a **0.7 threshold** into a `failures.jsonl` file. This allows for a "Root Cause Analysis":
+The system logs every case that falls below a **0.7 threshold**. This allows for a "Root Cause Analysis":
 - **Low Context Relevancy $\rightarrow$ Low Faithfulness:** The problem is the **Vector Store/Embeddings**.
 - **High Context Relevancy $\rightarrow$ Low Faithfulness:** The problem is the **LLM Prompt/Reasoning**.
+
+---
+
+## 📈 Experimental Results & Analysis
+
+Using the **Qwen-2.5-32B** (via Groq) and a Golden Dataset, I conducted a sensitivity analysis on the retriever's $k$ value (the number of document chunks retrieved).
+
+### Performance Comparison
+
+| Experiment | Retriever $k$ | Answer Relevancy | Faithfulness | Correctness |
+| :--- | :--- | :--- | :--- | :--- |
+| **V1** | 1 | 0.60 | 0.40 | 0.32 |
+| **V2** | **2** | **1.00** | **0.97** | **0.62** |
+| **V3** | 3 | 0.71 | 0.77 | 0.60 |
+
+### Key Technical Insights
+- **Optimal Context Window:** Experiment **V2 ($k=2$)** emerged as the "sweet spot," achieving perfect Answer Relevancy and the highest Faithfulness (0.97), indicating that two chunks provided sufficient evidence without introducing noise.
+- **Under-Retrieval Effect:** At $k=1$, the system suffered from low faithfulness (0.40), as the single most similar chunk often lacked the complete information required to answer the query accurately.
+- **Retrieval Noise:** Increasing $k$ to 3 resulted in a performance dip. This suggests that additional chunks introduced irrelevant information (noise), which diluted the LLM's focus and reduced the precision of the generated answer.
 
 ---
 
