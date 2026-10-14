@@ -2,11 +2,11 @@
 
 A professional framework for the systematic evaluation of Retrieval-Augmented Generation (RAG) pipelines. This project provides a complete environment to ingest documents, retrieve context, generate responses using high-performance open-source LLMs, and quantify performance using industry-standard metrics.
 
-## 📌 Overview
+## Overview
 
 Evaluating LLMs often suffers from subjectivity. This system replaces qualitative "manual testing" with quantitative metrics. By leveraging **DeepEval**, the system implements an "LLM-as-a-Judge" pattern to provide a mathematical score for the quality of the RAG pipeline.
 
-## 🛠️ Technical Stack
+## Technical Stack
 
 ### Core Architecture
 - **LLM Inference:** [Groq](https://groq.com/) (Llama-3 / Mixtral) for low-latency, high-throughput generation.
@@ -20,9 +20,9 @@ Evaluating LLMs often suffers from subjectivity. This system replaces qualitativ
 
 ---
 
-## 📊 Evaluation Framework (The "Eval" Suite)
+## Evaluation Framework (The "Eval" Suite)
 
-The core of this project is the transition from "vibes-based" testing to **Metric-Driven Development**. The system employs a specialized evaluation suite to pinpoint exactly where a RAG pipeline is failing.
+The core of this project is the transition from "vibes-based" testing to **Metric-Driven Development**. The system employs a specialized evaluation suite to pinpoint exactly where a RAG pipeline is failing. For this initial phase, the system was evaluated using a dataset of **5 test cases** and a FAISS index containing **10 document chunks** extracted from a single PDF.
 
 ### 1. The Metrics (KPIs)
 We measure four critical dimensions to ensure the AI is both honest and useful:
@@ -48,7 +48,7 @@ The system logs every case that falls below a **0.7 threshold**. This allows for
 
 ---
 
-## 📈 Experimental Results & Analysis
+## Experimental Results & Analysis
 
 Using the **Qwen-2.5-32B** (via Groq) and a Golden Dataset, I conducted a sensitivity analysis on the retriever's $k$ value (the number of document chunks retrieved).
 
@@ -61,13 +61,26 @@ Using the **Qwen-2.5-32B** (via Groq) and a Golden Dataset, I conducted a sensit
 | **V3** | 3 | 0.71 | 0.77 | 0.60 |
 
 ### Key Technical Insights
-- **Optimal Context Window:** Experiment **V2 ($k=2$)** emerged as the "sweet spot," achieving perfect Answer Relevancy and the highest Faithfulness (0.97), indicating that two chunks provided sufficient evidence without introducing noise.
-- **Under-Retrieval Effect:** At $k=1$, the system suffered from low faithfulness (0.40), as the single most similar chunk often lacked the complete information required to answer the query accurately.
-- **Retrieval Noise:** Increasing $k$ to 3 resulted in a performance dip. This suggests that additional chunks introduced irrelevant information (noise), which diluted the LLM's focus and reduced the precision of the generated answer.
+- **Empirical Performance:** In this small-scale run, **Experiment V2 ($k=2$)** scored the best across most metrics, achieving a Faithfulness score of 0.97 and Answer Relevancy of 1.00.
+- **Context Sensitivity:** At $k=1$, the system showed lower faithfulness (0.40), suggesting that a single chunk was often insufficient. Conversely, increasing $k$ to 3 led to a slight decrease in performance, indicating that additional chunks may have introduced irrelevant information.
+
+## Limitations
+
+- **Dataset Size:** The evaluation used a very small dataset (5 cases), meaning the results are indicative of system behavior but not statistically conclusive.
+- **Judge Consistency:** A specific judge error was noted in Experiment V2, Case 3, where the scoring did not align with the provided context.
+- **Judge Bias:** The evaluation relies on a single LLM as a judge; the results may be subject to the inherent biases and reasoning limitations of that specific model.
+
+## Next Steps
+
+To move this from a prototype to a production-ready system, the following improvements are planned:
+- **Scale Dataset:** Expand the "Golden Dataset" to hundreds of test cases to ensure statistical significance.
+- **Multi-Document RAG:** Test the system's ability to retrieve and synthesize information across multiple PDFs.
+- **Error Recovery:** Implement a retry mechanism or a multi-judge consensus system to mitigate single-judge errors.
+- **Reranking Layer:** Experiment with a Cross-Encoder reranker to improve context relevancy before passing chunks to the LLM.
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 - Python 3.10+
@@ -103,7 +116,7 @@ Using the **Qwen-2.5-32B** (via Groq) and a Golden Dataset, I conducted a sensit
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 ```text
 Open_LLM_Eval_System/
@@ -121,5 +134,5 @@ Open_LLM_Eval_System/
 └── requirements.txt    # Project dependencies
 ```
 
-## ⚖️ License
+## License
 Distributed under the MIT License.
