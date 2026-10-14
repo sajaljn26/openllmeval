@@ -7,9 +7,9 @@ import streamlit as st
 
 PROJECT_ROOT = Path(__file__).resolve().parent
 EXPERIMENT_FILES = [
-    PROJECT_ROOT / "experiment_v1.jsonl",
-    PROJECT_ROOT / "experiment_v2.jsonl",
-    PROJECT_ROOT / "experiment_v3.jsonl",
+    PROJECT_ROOT / "experiments/experiment_v1.jsonl",
+    PROJECT_ROOT / "experiments/experiment_v2.jsonl",
+    PROJECT_ROOT / "experiments/experiment_v3.jsonl",
 ]
 
 METRIC_COLUMNS = [

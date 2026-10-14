@@ -111,7 +111,7 @@ def run_full_evaluation(experiment_name="experiment_v1", k_value=3):
         })
 
     # Save individual results for this experiment
-    with open(f"results_{experiment_name}.jsonl", "w") as f:
+    with open(f"results/results_{experiment_name}.jsonl", "w") as f:
         for res in individual_results:
             f.write(json.dumps(res) + "\n")
 
@@ -135,7 +135,7 @@ def run_full_evaluation(experiment_name="experiment_v1", k_value=3):
         }
     }
 
-    with open(f"{experiment_name}.jsonl", "w") as f:
+    with open(f"experiments/{experiment_name}.jsonl", "w") as f:
         json.dump(summary, f)
     
     print(f"✅ Evaluation complete. Summary saved to {experiment_name}.jsonl")

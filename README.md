@@ -113,6 +113,8 @@ Open_LLM_Eval_System/
 │   ├── tools.py        # Retrieval tools
 │   └── prompts.py      # System prompts for the agent
 ├── pdfs/               # Source documents for retrieval
+├── experiments/        # Summary of evaluation runs (.jsonl)
+├── results/            # Detailed case-by-case results (.jsonl)
 ├── single_tests/       # Unit tests for individual metrics
 ├── run_evaluations.py   # Main evaluation runner
 ├── dashboard.py        # Streamlit visualization app
