@@ -1,6 +1,6 @@
-# Open LLM Evaluation System
+# openllmeval
 
-A professional framework for the systematic evaluation of Retrieval-Augmented Generation (RAG) pipelines. This project provides a complete environment to ingest documents, retrieve context, generate responses using high-performance open-source LLMs, and quantify performance using industry-standard metrics.
+A small framework for evaluating Retrieval-Augmented Generation (RAG) pipelines: it ingests a PDF, retrieves context, generates answers with an open-source LLM, and scores them with DeepEval metrics.
 
 ## Overview
 
@@ -39,7 +39,7 @@ To optimize the system, I conducted multiple evaluation runs (Experiments) to te
 
 - **Experiment V1 ($k=1$):** Minimal context. Used as a baseline to identify "under-retrieval" errors.
 - **Experiment V2 ($k=2$):** Balanced context. Testing the optimal trade-off between precision and noise.
-- **Experiment V3 ($k=3$):** Increased context. Testing if more information leads to higher correctness or introduces "lost-in-the-middle" effects.
+- **Experiment V3 ($k=3$):** Increased context. Testing if more information leads to higher correctness.
 
 ### 3. Failure Analysis
 The system logs every case that falls below a **0.7 threshold**. This allows for a "Root Cause Analysis":
@@ -50,7 +50,7 @@ The system logs every case that falls below a **0.7 threshold**. This allows for
 
 ## Experimental Results & Analysis
 
-Using the **Qwen-2.5-32B** (via Groq) and a Golden Dataset, I conducted a sensitivity analysis on the retriever's $k$ value (the number of document chunks retrieved).
+Using the **qwen/qwen3.8-27b** (via Groq) and a Golden Dataset, I conducted a sensitivity analysis on the retriever's $k$ value (the number of document chunks retrieved).
 
 ### Performance Comparison
 
@@ -68,10 +68,10 @@ Using the **Qwen-2.5-32B** (via Groq) and a Golden Dataset, I conducted a sensit
 
 ## Failure Analysis
 
-A detailed analysis of failing cases (scoring below 0.7 on any metric) revealed that 13 of 15 total cases fell below the threshold, primarily on Context Relevancy and Correctness.
+A detailed analysis of failing cases (scoring below 0.7 on any metric) revealed that 13 of 15 total cases (including the judge-error case) fell below the threshold, primarily on Context Relevancy and Correctness.
 
 Examples of failure types:
-- **Retrieval/Correctness Failure:** In Experiment V1, the question "What is the purpose of the study in the PDF?" returned a correct answer ("The provided PDF does not contain enough information...") but received scores of 0.00 for both Context Relevancy and Correctness.
+- **Retrieval/Correctness Failure:** In Experiment V1, for the question "What is the purpose of the study in the PDF?", the agent correctly stated that the PDF does not contain enough information to answer, and the retrieved context indeed lacked the necessary information, yet the case was flagged as a failure.
 - **Judge Error:** In Experiment V2, Case 3 ("Can penguins fly?"), the agent provided a grounded, correct answer, but the judge returned all 0.00 scores due to an invalid JSON response from the judge LLM.
 
 ## Limitations
@@ -130,10 +130,11 @@ Examples of failure types:
 ## Project Structure
 
 ```text
-Open_LLM_Eval_System/
+openllmeval/
 ├── RAG1/               # Core RAG Pipeline
 │   ├── agent.py        # LLM logic and chain orchestration
 │   ├── indexing.py      # Embedding and FAISS setup
+│   ├── file_reader.py   # PDF text extraction
 │   ├── tools.py        # Retrieval tools
 │   └── prompts.py      # System prompts for the agent
 ├── pdfs/               # Source documents for retrieval
