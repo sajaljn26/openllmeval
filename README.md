@@ -9,7 +9,7 @@ Evaluating LLMs often suffers from subjectivity. This system replaces qualitativ
 ## Technical Stack
 
 ### Core Architecture
-- **LLM Inference:** [Groq](https://groq.com/) (Llama-3 / Mixtral) for low-latency, high-throughput generation.
+- **LLM Inference:** [Groq](https://groq.com/) (`qwen/qwen3.8-27b`) for low-latency, high-throughput generation.
 - **Embeddings:** `sentence-transformers/all-MiniLM-L6-v2` via HuggingFace for efficient local vectorization.
 - **Vector Database:** **FAISS** (Facebook AI Similarity Search) for optimized similarity search.
 - **Evaluation Framework:** **DeepEval** for calculating RAG-specific metrics.
@@ -54,29 +54,40 @@ Using the **Qwen-2.5-32B** (via Groq) and a Golden Dataset, I conducted a sensit
 
 ### Performance Comparison
 
-| Experiment | Retriever $k$ | Answer Relevancy | Faithfulness | Correctness |
-| :--- | :--- | :--- | :--- | :--- |
-| **V1** | 1 | 0.60 | 0.40 | 0.32 |
-| **V2** | **2** | **1.00** | **0.97** | **0.62** |
-| **V3** | 3 | 0.71 | 0.77 | 0.60 |
+| Experiment | Retriever $k$ | Judge Errors | Answer Relevancy (All/Excl) | Faithfulness (All/Excl) | Context Rel (All/Excl) | Correctness (All/Excl) |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **V1** | 1 | 0 | 1.000 / 1.000 | 1.000 / 1.000 | 0.583 / 0.583 | 0.660 / 0.660 |
+| **V2** | 2 | 1 | 0.667 / 0.833 | 0.800 / 1.000 | 0.528 / 0.660 | 0.460 / 0.575 |
+| **V3** | 3 | 0 | 1.000 / 1.000 | 0.971 / 0.971 | 0.408 / 0.408 | 0.660 / 0.660 |
 
 ### Key Technical Insights
-- **Empirical Performance:** In this small-scale run, **Experiment V2 ($k=2$)** scored the best across most metrics, achieving a Faithfulness score of 0.97 and Answer Relevancy of 1.00.
-- **Context Sensitivity:** At $k=1$, the system showed lower faithfulness (0.40), suggesting that a single chunk was often insufficient. Conversely, increasing $k$ to 3 led to a slight decrease in performance, indicating that additional chunks may have introduced irrelevant information.
+- **Faithfulness:** Faithfulness remained near 1.0 across all tested $k$ values.
+- **Configuration Performance:** With only 5 test questions, no single configuration clearly outperformed the others.
+- **Context Relevancy:** Experiment V3 ($k=3$) had the lowest context relevancy (0.41).
+- **Judge Errors:** One judge error in Experiment V2 Case 3 was recorded as 0, which lowered V2's overall averages; the excluded column reflects averages calculated over the 4 remaining valid cases.
+
+## Failure Analysis
+
+A detailed analysis of failing cases (scoring below 0.7 on any metric) revealed that 13 of 15 total cases fell below the threshold, primarily on Context Relevancy and Correctness.
+
+Examples of failure types:
+- **Retrieval/Correctness Failure:** In Experiment V1, the question "What is the purpose of the study in the PDF?" returned a correct answer ("The provided PDF does not contain enough information...") but received scores of 0.00 for both Context Relevancy and Correctness.
+- **Judge Error:** In Experiment V2, Case 3 ("Can penguins fly?"), the agent provided a grounded, correct answer, but the judge returned all 0.00 scores due to an invalid JSON response from the judge LLM.
 
 ## Limitations
 
-- **Dataset Size:** The evaluation used a very small dataset (5 cases), meaning the results are indicative of system behavior but not statistically conclusive.
-- **Judge Consistency:** A specific judge error was noted in Experiment V2, Case 3, where the scoring did not align with the provided context.
-- **Judge Bias:** The evaluation relies on a single LLM as a judge; the results may be subject to the inherent biases and reasoning limitations of that specific model.
+- **Dataset Size:** Evaluated on only 5 factual questions.
+- **Indexing Scale:** Index consists of only 10 chunks from a single PDF.
+- **Evaluation Bias:** The judge is the same model as the generator (`qwen/qwen3.8-27b`), which may introduce self-evaluation bias.
+- **Error Handling:** Judge errors are recorded as 0, which pulls down the arithmetic mean.
+- **Consistency:** Results differed from an earlier run of the same configurations.
 
 ## Next Steps
 
-To move this from a prototype to a production-ready system, the following improvements are planned:
-- **Scale Dataset:** Expand the "Golden Dataset" to hundreds of test cases to ensure statistical significance.
-- **Multi-Document RAG:** Test the system's ability to retrieve and synthesize information across multiple PDFs.
-- **Error Recovery:** Implement a retry mechanism or a multi-judge consensus system to mitigate single-judge errors.
-- **Reranking Layer:** Experiment with a Cross-Encoder reranker to improve context relevancy before passing chunks to the LLM.
+- **Improve Error Handling:** Implement a retry mechanism for judge errors instead of scoring them as 0.
+- **Independent Judging:** Use a separate, more capable judge model to reduce bias.
+- **Expand Dataset:** Merge `eval_dataset_new.jsonl` into the main evaluation suite for more coverage.
+- **Scalability:** Add more PDFs to test the system's retrieval performance at scale.
 
 ---
 
@@ -89,8 +100,8 @@ To move this from a prototype to a production-ready system, the following improv
 ### Installation
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/Open-LLM-Evaluation-System.git
-   cd Open-LLM-Evaluation-System
+   git clone https://github.com/sajaljn26/openllmeval.git
+   cd openllmeval
    ```
 2. Install dependencies:
    ```bash
@@ -130,6 +141,8 @@ Open_LLM_Eval_System/
 ├── results/            # Detailed case-by-case results (.jsonl)
 ├── single_tests/       # Unit tests for individual metrics
 ├── run_evaluations.py   # Main evaluation runner
+├── analyze_failures.py # Failure analysis script
+├── compare_results.py    # Experiment comparison script
 ├── dashboard.py        # Streamlit visualization app
 └── requirements.txt    # Project dependencies
 ```
